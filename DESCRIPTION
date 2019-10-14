@@ -1,11 +1,38 @@
 Package: poptools
 Type: Package
-Title: What the Package Does (Title Case)
+Title: A population synthesis toolbox for transportists, planners, demographers, and nerds.
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Nick Fournier
+Maintainer: Nick Fournier
+Description: Contains useful tools and example scripts for generating a synthetic population
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+Imports:
+  glmnet,
+  HydeNet,
+  visNetwork,
+  bnlearn,
+  survey,
+  RcppProgress,
+  mipfp,
+  dplyr,
+  plyr,
+  reshape2,
+  parallel,
+  pryr,
+  filehash,
+  data.table,
+  RCurl,
+  pbapply,
+  abind,
+  Rcpp,
+  RcppArmadillo,
+  Matrix,
+  limSolve,
+  nnls,
+  gridExtra
+Suggests:
+  ggplot2,
+  extrafont,
+  clpAPI

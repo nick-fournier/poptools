@@ -1,10 +1,10 @@
 #### Loading Tables ####
 # Microsample
 tables<-list()
-tables[["mtshh"]]  <- read.csv("./rdata/MTS/HH.csv", stringsAsFactors=F)
-tables[["mtsind"]] <- read.csv("./rdata/MTS/PER.csv", stringsAsFactors=F)
-tables[["mtsplace"]] <- read.csv("./rdata/MTS/PLACE.csv", stringsAsFactors=F)
-tables[["mtsveh"]] <- read.csv("./rdata/MTS/VEH.csv", stringsAsFactors=F)
+# tables[["mtshh"]]  <- read.csv("./rdata/MTS/HH.csv", stringsAsFactors=F)
+# tables[["mtsind"]] <- read.csv("./rdata/MTS/PER.csv", stringsAsFactors=F)
+# tables[["mtsplace"]] <- read.csv("./rdata/MTS/PLACE.csv", stringsAsFactors=F)
+# tables[["mtsveh"]] <- read.csv("./rdata/MTS/VEH.csv", stringsAsFactors=F)
 #pums
 hhcols <- c("SERIALNO","NP","VEH","BLD","MRGX","HINCP","HHT","HUPAC","NR","NOC")
 indcols <- c("SERIALNO","SPORDER","SEX","AGEP","RELP","ESR","WKHP","JWTR","JWMNP","INDP",
@@ -82,14 +82,14 @@ tables[["indindusocc"]] <- read.csv("./rdata/marginals/ACS_15_5YR_C24050_with_an
 tables[["hhinc"]]       <- read.csv("./rdata/marginals/ACS_15_5YR_B19001_with_ann.csv", stringsAsFactors=F) # <<<
 tables[["hhdwellsize"]] <- read.csv("./rdata/marginals/ACS_15_5YR_B25124_with_ann.csv", stringsAsFactors=F) # <<<
 tables[["hhvehsize"]]   <- read.csv("./rdata/marginals/ACS_15_5YR_B08201_with_ann.csv", stringsAsFactors=F) # <<<
-tables[["hhraceA"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001A_with_ann.csv", stringsAsFactors=F) # <<<
-tables[["hhraceB"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001B_with_ann.csv", stringsAsFactors=F) # <<<
-tables[["hhraceC"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001C_with_ann.csv", stringsAsFactors=F) # <<<
-tables[["hhraceD"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001D_with_ann.csv", stringsAsFactors=F) # <<<
-tables[["hhraceE"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001E_with_ann.csv", stringsAsFactors=F) # <<<
-tables[["hhraceF"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001F_with_ann.csv", stringsAsFactors=F) # <<<
-tables[["hhraceG"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001G_with_ann.csv", stringsAsFactors=F) # <<<
-tables[["hhraceH"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001H_with_ann.csv", stringsAsFactors=F) # <<<
+# tables[["hhraceA"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001A_with_ann.csv", stringsAsFactors=F) # <<<
+# tables[["hhraceB"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001B_with_ann.csv", stringsAsFactors=F) # <<<
+# tables[["hhraceC"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001C_with_ann.csv", stringsAsFactors=F) # <<<
+# tables[["hhraceD"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001D_with_ann.csv", stringsAsFactors=F) # <<<
+# tables[["hhraceE"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001E_with_ann.csv", stringsAsFactors=F) # <<<
+# tables[["hhraceF"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001F_with_ann.csv", stringsAsFactors=F) # <<<
+# tables[["hhraceG"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001G_with_ann.csv", stringsAsFactors=F) # <<<
+# tables[["hhraceH"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001H_with_ann.csv", stringsAsFactors=F) # <<<
 
 
 # Individuals
@@ -135,15 +135,15 @@ tables[["hhraceH"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B11001H_with_a
 # Household size for proportional assignment
 # 
 # #Vehicles
-tables[["aggvehs"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B25046_with_ann.csv", stringsAsFactors=F)
+# tables[["aggvehs"]]     <- read.csv("./rdata/marginals/ACS_15_5YR_B25046_with_ann.csv", stringsAsFactors=F)
 
 # Workplace
-tables[["workplace"]]   <- read.csv("./rdata/marginals/BP_2010_00A1_with_ann.csv", stringsAsFactors=F)
+# tables[["workplace"]]   <- read.csv("./rdata/marginals/BP_2010_00A1_with_ann.csv", stringsAsFactors=F)
 #schools
-tables[["enroll"]]   <- read.csv("./rdata/spatial/enrollment.csv", stringsAsFactors=F, numeral="no.loss")
-tables[["taz_xy"]]   <- read.csv("./rdata/spatial/taz_xy.csv", stringsAsFactors=F, numeral="no.loss")
-tables[["schools_xy"]]   <- read.csv("./rdata/spatial/schools_tazxy.csv", stringsAsFactors=F, numeral="no.loss")
-tables[["colleges_xy"]]   <- read.csv("./rdata/spatial/colleges_tazxy.csv", stringsAsFactors=F, numeral="no.loss")
+# tables[["enroll"]]   <- read.csv("./rdata/spatial/enrollment.csv", stringsAsFactors=F, numeral="no.loss")
+# tables[["taz_xy"]]   <- read.csv("./rdata/spatial/taz_xy.csv", stringsAsFactors=F, numeral="no.loss")
+# tables[["schools_xy"]]   <- read.csv("./rdata/spatial/schools_tazxy.csv", stringsAsFactors=F, numeral="no.loss")
+# tables[["colleges_xy"]]   <- read.csv("./rdata/spatial/colleges_tazxy.csv", stringsAsFactors=F, numeral="no.loss")
 tables[["tract2puma"]]   <- read.csv("./rdata/spatial/2010_Census_Tract_to_2010_PUMA.txt",stringsAsFactors=F, colClasses = "character")
 
 rm(hhcols, indcols, pumshh, pumsind)
