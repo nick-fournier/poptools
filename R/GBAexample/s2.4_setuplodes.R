@@ -1,6 +1,10 @@
-source("./s1.0_packages.R", echo=F)
-load("./db/d2.3_microdata.RData")
-load("./db/d2.5_margins.RData")
+
+
+load("./data/microdata.RData")
+load("./data/marginal_ind.RData")
+load("./data/marginal_hh.RData")
+
+if(!exists("tracts")) tracts <- marginals_hh[[1]][['tracts']]
 
 #loading data ####
 print("Loading LODES data")
@@ -14,7 +18,6 @@ print("Loading conversion tables")
 #List of support files
 lsconv <- list(
   header = fread("./rdata/LODES/wacheaders.csv", sep = ",", integer64 = "character"),
-  BLK2TAZ = fread("./rdata/spatial/BLOCKS2TAZ.csv", stringsAsFactors = F, sep = ",", integer64 = "character"),
   naicskey = fread("./rdata/LODES/naicskey.csv", sep = ","))
 
 #Setting up lodes ####
@@ -104,6 +107,18 @@ LODES <- lapply(lslodes, function(x) { #subsets columns, aggregates blocks to tr
   return(x)
 })
 
+# #Save for example data
+# lodes_od = as.data.table(LODES$OD)
+# lodes_di = as.data.table(LODES$dtotal)
+# lodes_oi = as.data.table(LODES$ototal)
+# fwrite(lodes_od, file = "./data/lodes_od.csv")
+# fwrite(lodes_di, file = "./data/lodes_di.csv")
+# fwrite(lodes_oi, file = "./data/lodes_oi.csv")
+# save(lodes_od, file = "./data/lodes_od.RData")
+# save(lodes_di, file = "./data/lodes_di.RData")
+# save(lodes_oi, file = "./data/lodes_oi.RData")
+
+
 #setting up totals matrices ####
 print("Setting up totals tables")
 mtxDI <- as.matrix(LODES[['dtotal']][,-1], dimnames = list(LODES[['dtotal']]$dtract, colnames(LODES[['dtotal']])[-1]))
@@ -132,7 +147,6 @@ mtxOD <- mtxOD[c("00000000000",tracts),c("00000000000",tracts)]
 ODnames <- dimnames(mtxOD)
 OInames <- dimnames(mtxOI)
 DInames <- dimnames(mtxDI)
-
 
 #Plot checks
 #OD vs OI

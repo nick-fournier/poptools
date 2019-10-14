@@ -178,22 +178,22 @@ for(i in names(margins)){
 }
 
 
-
-marginal_hhinc = as.data.table(margins[["hhinc"]],keep.rownames = T)
-marginal_hhvehsize = as.data.table(margins[["hhvehsize"]],keep.rownames = T)
-marginal_hhdwell = as.data.table(margins[["hhdwell"]],keep.rownames = T)
-
-setnames(marginal_hhdwell, "rn","tract")
-setnames(marginal_hhinc, "rn","tract")
-setnames(marginal_hhvehsize, "V3","tract")
-fwrite(marginal_hhdwell, file = "./data/marginal_hh_dwellingtype.csv")
-fwrite(marginal_hhinc, file = "./data/marginal_hh_income.csv")
-fwrite(marginal_hhvehsize, file = "./data/marginal_hh_vehiclesandsize.csv")
-
-names(dimnames(marg_hhvehsize2)) <- c("tracts","HHSIZ","HHVEH")
-
-marginals_hh <- list("inc"=marg_hhinc, "dwell" = marginal_hhdwell, "vehsize" = marg_hhvehsize2)
-save(marginals_hh, file = "./data/marginal_hh.RData")
+# 
+# marginal_hhinc = as.data.table(margins[["hhinc"]],keep.rownames = T)
+# marginal_hhvehsize = as.data.table(margins[["hhvehsize"]],keep.rownames = T)
+# marginal_hhdwell = as.data.table(margins[["hhdwell"]],keep.rownames = T)
+# 
+# setnames(marginal_hhdwell, "rn","tracts")
+# setnames(marginal_hhinc, "rn","tracts")
+# setnames(marginal_hhvehsize, "V3","tracts")
+# fwrite(marginal_hhdwell, file = "./data/marginal_hh_dwellingtype.csv")
+# fwrite(marginal_hhinc, file = "./data/marginal_hh_income.csv")
+# fwrite(marginal_hhvehsize, file = "./data/marginal_hh_vehiclesandsize.csv")
+# 
+# names(dimnames(marg_hhvehsize2)) <- c("tracts","HHSIZ","HHVEH")
+# 
+# marginals_hh <- list("inc"=marginal_hhinc, "dwell" = marginal_hhdwell, "vehsize" = marg_hhvehsize2)
+# save(marginals_hh, file = "./data/marginal_hh.RData")
 
 
 print("HH Margins done")
