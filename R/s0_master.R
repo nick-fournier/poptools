@@ -1,14 +1,3 @@
-##
-# Population Synthesis for Boston Metropolitan Region, by Nicholas Marc Fournier
-# Last updated January 2017.
-#
-# NOTICE:  All information, intellectual and technical concepts contained herein is,
-# and remains the property of Nicholas Marc Fournier. Dissemination of this 
-# information or reproduction of this material is strictly forbidden unless
-# prior written permission is obtained from Nicholas Marc Fournier.
-##
-
-
 #### Create data base folder if not already
 if(!dir.exists("./db")){ dir.create("./db") }
 
@@ -112,46 +101,41 @@ system.time(source("./s4.1_NLAD_IPF.R", echo=F))
 
 
 
-#Write to csv
-csvwriteout <- function() {
-  library(data.table)
-  print("Writing data to CSV:")
-  print("Loading vehicle data")
-  load("./db/d7.0_vehpop.RData")
-  print("Loading population data")
-  load("./db/d9_finalpop.RData")
-  #cleaning up individuals
-  print("Checking for errors")
-  indpop$postcode_id <- indpop$taz_id
-  indpop$taz_id <- NULL
-  err <- F
-  #check if any null
-  for(i in 1:length(indpop)) { if(any(is.na(indpop[[i]]))){
-    print(paste("NA's in ", colnames(indpop)[i]))
-    err <- T
-    } }
-  for(i in 1:length(hhpop)) { if(any(is.na(hhpop[[i]]))){
-    print(paste("NA's in ", colnames(indpop)[i]))
-    err <- T
-  } }
-  if(err==F) {
-    #writing
-    print("No errors found, Writing data")
-    fwrite(indpop, paste("./output/CSV/individual_", format(Sys.Date(), format="%m-%d-%Y"), ".csv", sep = ""))
-    fwrite(hhpop, paste("./output/CSV/household_", format(Sys.Date(), format="%m-%d-%Y"), ".csv", sep = ""))
-    fwrite(vehpop, paste("./output/CSV/vehicles_", format(Sys.Date(), format="%m-%d-%Y"), ".csv", sep = ""))
-    print("Done saving data")
-  } else {
-    print("Errors found, breaking from program.")
-  }
-}
-
-system.time(csvwriteout())
-
-#Validate synth pop accuracy
-system.time(source("./x3_WorkTripaggregates.R", echo=F))
-system.time(source("./x4_basicchecks.R", echo=F))
-system.time(source("./x5_validation.R", echo=F))
+# #Write to csv
+# csvwriteout <- function() {
+#   library(data.table)
+#   print("Writing data to CSV:")
+#   print("Loading vehicle data")
+#   load("./db/d7.0_vehpop.RData")
+#   print("Loading population data")
+#   load("./db/d9_finalpop.RData")
+#   #cleaning up individuals
+#   print("Checking for errors")
+#   indpop$postcode_id <- indpop$taz_id
+#   indpop$taz_id <- NULL
+#   err <- F
+#   #check if any null
+#   for(i in 1:length(indpop)) { if(any(is.na(indpop[[i]]))){
+#     print(paste("NA's in ", colnames(indpop)[i]))
+#     err <- T
+#     } }
+#   for(i in 1:length(hhpop)) { if(any(is.na(hhpop[[i]]))){
+#     print(paste("NA's in ", colnames(indpop)[i]))
+#     err <- T
+#   } }
+#   if(err==F) {
+#     #writing
+#     print("No errors found, Writing data")
+#     fwrite(indpop, paste("./output/CSV/individual_", format(Sys.Date(), format="%m-%d-%Y"), ".csv", sep = ""))
+#     fwrite(hhpop, paste("./output/CSV/household_", format(Sys.Date(), format="%m-%d-%Y"), ".csv", sep = ""))
+#     fwrite(vehpop, paste("./output/CSV/vehicles_", format(Sys.Date(), format="%m-%d-%Y"), ".csv", sep = ""))
+#     print("Done saving data")
+#   } else {
+#     print("Errors found, breaking from program.")
+#   }
+# }
+# 
+# system.time(csvwriteout())
 
 #Refresh
 source("./cleanup.R", echo = F)

@@ -1,13 +1,3 @@
-##
-# Population Synthesis for Boston Metropolitan Region, by Nicholas Marc Fournier
-# Last updated January 2017.
-#
-# NOTICE:  All information, intellectual and technical concepts contained herein is,
-# and remains the property of Nicholas Marc Fournier. Dissemination of this 
-# information or reproduction of this material is strictly forbidden unless
-# prior written permission is obtained from Nicholas Marc Fournier
-##
-
 # Setting up margins for households
 pums_hh <- microdata[["pums_hh"]]
 pums_ind <- microdata[["pums_ind"]]

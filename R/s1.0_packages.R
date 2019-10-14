@@ -1,12 +1,3 @@
-##
-# R Packages for Population Synthesis for Boston Metropolitan Region
-#
-# NOTICE:  All information, intellectual and technical concepts contained herein is,
-# and remains the property of Nicholas Marc Fournier. Dissemination of this 
-# information or reproduction of this material is strictly forbidden unless
-# prior written permission is obtained from Nicholas Marc Fournier
-##
-
 #### Installing packages ####
 if("mipfp" %in% rownames(installed.packages()) == FALSE) {install.packages("mipfp")}
 if("dplyr" %in% rownames(installed.packages()) == FALSE) {install.packages("dplyr")}
