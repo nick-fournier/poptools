@@ -38,10 +38,7 @@ dl.lodes <- function(state=NULL, year=NULL, filedest=NULL) {
   
     fdir <- paste(filedest, lode, sep = "/")
     url <- paste(baseurl,state,prefix,lode,sep="/")
-
-    if(!file.exists(fdir)) {
-      download.file(url, fdir)
-    }
+    if(!file.exists(fdir)) download.file(url, fdir)
   }
 }
 
@@ -84,10 +81,7 @@ dl.pums <- function(state=NULL, year=NULL, filedest=NULL) {
   for(pums in files) {
     fdir <- paste(filedest, pums, sep = "/")
     url <- paste(baseurl,year,"5-Year",pums, sep="/")
-    
-    if(!file.exists(fdir)) {
-      download.file(url, fdir)
-    }
+    if(!file.exists(fdir)) download.file(url, fdir)
   }
 }
 
@@ -96,10 +90,14 @@ dl.pums <- function(state=NULL, year=NULL, filedest=NULL) {
 #Downloads the latest or specified PUMS data
 dl.tables <- function(state=NULL, year=NULL, filedest=NULL) {
   
-  baseurl <- "https://www2.census.gov/programs-surveys/acs/summary_file/"
+  baseurl <- "https://www2.census.gov/programs-surveys/acs/summary_file"
   
-  abbrevs <- fread("./data/raw/stateabbreviations.csv")
-  abbrevs <- structure(.Data = abbrevs$State, .Names = tolower(abbrevs$Abbreviation))
+  #Ensure lower case
+  state <- tolower(state)
+  
+  #Abbreviations
+  statebrevs <- fread("./data/raw/stateabbreviations.csv")
+  statebrevs <- structure(.Data = statebrevs$State, .Names = tolower(statebrevs$Abbreviation))
   
   #Basic checks
   if(is.null(state)) stop("Invalid state specified")
@@ -116,38 +114,55 @@ dl.tables <- function(state=NULL, year=NULL, filedest=NULL) {
     
     #Check contents of latest folder, if empty check next most recent
     for(year in rev(years)) {
-      url <- paste(baseurl,year,"data/computer_internet_tables/", sep="/")
-      html <- tryCatch(paste(readLines(url), collapse="\n"),
-                       warning = function(w) NA,
-                       error = function(e) NA)
-      if(!is.na(html)) break;
+      url <- paste(baseurl,year,"data/", sep="/")
+      html <- paste(readLines(url), collapse="\n")
+      matched <- unlist(str_match_all(html, "<a href=\"(.*?)\""))
+      if(any(grepl("5_year_by_state",matched))) break;
     }
     print(paste("No year specified, defaulting to", year, "as most recent year available"))
   }
-  #Ensure lower case
-  state <- tolower(state)
   
-  #File base
-  files <- paste0(c("csv_h","csv_p"),state,".zip")
+  #download lookup file
+  url <- paste(baseurl,year,"documentation/user_tools/ACS_5yr_Seq_Table_Number_Lookup.txt", sep = "/")
+  fdir <- paste(filedest,"ACS_5yr_Seq_Table_Number_Lookup.txt", sep = "/")
+  if(!file.exists(fdir)) download.file(url, fdir)
+  lookup <- fread(fdir)
   
-  "B01001"
-  "B08201"
-  "B09019"
-  "B19001"
-  "B25124"
-  "C24050"
+  #determine which files
+  tableid <- c("B01001","B08201","B09019","B19001","B25124","C24050")
+  tableseq <- unique(lookup[`Table ID` %in% tableid, `Sequence Number`])
+  seqfiles <- paste0("e",year,"5",state,sprintf("%04d",tableseq),"000.txt")
+  headfiles <- paste0("xls_temp/seq",tableseq,".xlsx")
+  
+  
+  #download header file
+  file <- paste0(year,"_5yr_Summary_FileTemplates.zip")
+  url <- paste(baseurl,year,"data", file, sep = "/")
+  fdir <- paste(filedest, file, sep = "/")
+  if(!file.exists(fdir)) download.file(url, fdir)
+  
+  #unzip header files
+  unzip(fdir, files = headfiles, exdir = sub(".zip","",fdir))
+  headerdat <- lapply(paste(gsub(".zip","",fdir), headfiles, sep = "/"), function(x) {
+    read.xlsx(paste(gsub(".zip","",fdir), headfiles, sep = "/"), 1, header=F)
+    })
+  
+  
+  #download the summary files
+  file <- paste0(abbrevs[state],"_Tracts_Block_Groups_Only.zip")
+  url <- paste(baseurl,year,"data/5_year_by_state",file, sep = "/")
+  fdir <- paste(filedest, file, sep = "/")
+  if(!file.exists(fdir)) download.file(url, fdir)
+  
+  #unzip summary files
+  unzip(fdir, files = files, exdir = gsub(".zip","",fdir))
+  
+  censusdat <- lapply(paste(gsub(".zip","",fdir), files, sep = "/"), fread)
   
   
   
-  #downloading files
-  for(pums in files) {
-    fdir <- paste(filedest, pums, sep = "/")
-    url <- paste(baseurl,year,"5-Year",pums, sep="/")
-    
-    if(!file.exists(fdir)) {
-      download.file(url, fdir)
-    }
-  }
+  
+  
 }
 
 

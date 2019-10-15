@@ -25,6 +25,7 @@ Imports:
   data.table,
   stringr,
   pingr,
+  xlsx,
   pbapply,
   abind,
   Rcpp,
