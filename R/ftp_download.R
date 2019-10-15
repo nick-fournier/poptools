@@ -92,12 +92,13 @@ dl.tables <- function(state=NULL, year=NULL, filedest=NULL) {
   
   baseurl <- "https://www2.census.gov/programs-surveys/acs/summary_file"
   
-  #Ensure lower case
-  state <- tolower(state)
   
   #Abbreviations
-  statebrevs <- fread("./data/raw/stateabbreviations.csv")
-  statebrevs <- structure(.Data = statebrevs$State, .Names = tolower(statebrevs$Abbreviation))
+  statebrevs <- structure(.Data = state.name, .Names = state.abb)
+  #Ensure lower case
+  state <- tolower(state)
+  names(statebrevs) <- tolower(names(statebrevs))
+  
   
   #Basic checks
   if(is.null(state)) stop("Invalid state specified")
@@ -122,7 +123,7 @@ dl.tables <- function(state=NULL, year=NULL, filedest=NULL) {
     print(paste("No year specified, defaulting to", year, "as most recent year available"))
   }
   
-  #download lookup file
+  ## download lookup file
   url <- paste(baseurl,year,"documentation/user_tools/ACS_5yr_Seq_Table_Number_Lookup.txt", sep = "/")
   fdir <- paste(filedest,"ACS_5yr_Seq_Table_Number_Lookup.txt", sep = "/")
   if(!file.exists(fdir)) download.file(url, fdir)
@@ -135,32 +136,32 @@ dl.tables <- function(state=NULL, year=NULL, filedest=NULL) {
   headfiles <- paste0("xls_temp/seq",tableseq,".xlsx")
   
   
-  #download header file
+  ## download header file
   file <- paste0(year,"_5yr_Summary_FileTemplates.zip")
   url <- paste(baseurl,year,"data", file, sep = "/")
   fdir <- paste(filedest, file, sep = "/")
   if(!file.exists(fdir)) download.file(url, fdir)
   
-  #unzip header files
-  unzip(fdir, files = headfiles, exdir = sub(".zip","",fdir))
-  headerdat <- lapply(paste(gsub(".zip","",fdir), headfiles, sep = "/"), function(x) {
-    read.xlsx(paste(gsub(".zip","",fdir), headfiles, sep = "/"), 1, header=F)
-    })
+  #unzip and load header files
+  unzip(fdir, files = c(headfiles,paste0("xls_temp/",year,"_SFGeoFileTemplate.xls")), exdir = sub(".zip","",fdir))
+  headerdat <- lapply(paste(gsub(".zip","",fdir), headfiles, sep = "/"), function(x) read.xlsx(x, 1))
+  names(headerdat) <- tableseq
   
   
-  #download the summary files
-  file <- paste0(abbrevs[state],"_Tracts_Block_Groups_Only.zip")
+  ## download the summary files
+  file <- paste0(statebrevs[state],"_Tracts_Block_Groups_Only.zip")
   url <- paste(baseurl,year,"data/5_year_by_state",file, sep = "/")
   fdir <- paste(filedest, file, sep = "/")
   if(!file.exists(fdir)) download.file(url, fdir)
   
-  #unzip summary files
-  unzip(fdir, files = files, exdir = gsub(".zip","",fdir))
+  #unzip and load summary files
+  unzip(fdir, files = c(seqfiles,paste0("g",year,"5",state,".csv")), exdir = gsub(".zip","",fdir))
+  censusdat <- lapply(paste(gsub(".zip","",fdir), seqfiles, sep = "/"), fread)
+  names(censusdat) <- tableseq
   
-  censusdat <- lapply(paste(gsub(".zip","",fdir), files, sep = "/"), fread)
   
-  
-  
+  #
+  for(x in as.character(tableseq)) colnames(censusdat[[x]]) <- as.matrix(headerdat[[x]])[1,]
   
   
 }
