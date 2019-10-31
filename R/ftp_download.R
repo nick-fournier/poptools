@@ -1,16 +1,16 @@
 
+library(stringr)
+library(data.table)
+library(xlsx)
 
 #Downloads the latest or specified LODES data for home-work, home-industry, and work-industry
-dl.lodes <- function(state=NULL, year=NULL, filedest=NULL) {
+dl.lodes <- function(state=NULL, year=NULL, filedest="./data/raw") {
   
   baseurl <- "https://lehd.ces.census.gov/data/lodes/LODES7"
   
   #Basic checks
   if(is.null(state)) stop("Invalid state specified")
-  if(is.null(filedest)) {
-    filedest <- "./data/raw"
-    print(paste("No file destination specified, using default:", filedest))
-  }
+  if(is.null(filedest)) print(paste("No file destination specified, using default:", filedest))
   if(is.null(year)) {
     url <- paste(baseurl,"ma/od/", sep="/")
     html <- paste(readLines(url), collapse="\n")
@@ -29,31 +29,31 @@ dl.lodes <- function(state=NULL, year=NULL, filedest=NULL) {
   #downloading files
   for(lode in files) {
     fdir <- paste0(filedest, lode)
-    if(grepl("od", lode)) 
-      prefix <- "od" 
-    if(grepl("wac", lode)) 
-      prefix <- "wac" 
-    if(grepl("rac", lode)) 
-      prefix <- "rac"
+    if(grepl("od", lode)) prefix <- "od" 
+    if(grepl("wac", lode)) prefix <- "wac" 
+    if(grepl("rac", lode)) prefix <- "rac"
   
     fdir <- paste(filedest, lode, sep = "/")
     url <- paste(baseurl,state,prefix,lode,sep="/")
     if(!file.exists(fdir)) download.file(url, fdir)
   }
+  
+  #Load LODES into R
+  lodes <- lapply(paste(filedest,files,sep = "/"), fread)
+  names(lodes) <- c("od","rac","wac")
+  
+  return(lodes)
 }
 
 
 #Downloads the latest or specified PUMS data
-dl.pums <- function(state=NULL, year=NULL, filedest=NULL) {
+dl.pums <- function(state=NULL, year=NULL, filedest= "./data/raw") {
   
   baseurl <- "https://www2.census.gov/programs-surveys/acs/data/pums"
   
   #Basic checks
   if(is.null(state)) stop("Invalid state specified")
-  if(is.null(filedest)) {
-    filedest <- "./data/raw"
-    print(paste("No file destination specified, using default:", filedest))
-  }
+  if(is.null(filedest)) print(paste("No file destination specified, using default:", filedest))
   if(is.null(year)) {
     html <- paste(readLines(baseurl), collapse="\n")
     matched <- unlist(str_match_all(html, "<a href=\"(.*?)\""))
@@ -75,20 +75,33 @@ dl.pums <- function(state=NULL, year=NULL, filedest=NULL) {
   state <- tolower(state)
   
   #File base
-  files <- paste0(c("csv_h","csv_p"),state,".zip")
+  zips <- paste0(c("csv_h","csv_p"),state,".zip")
   
   #downloading files
-  for(pums in files) {
+  for(pums in zips) {
     fdir <- paste(filedest, pums, sep = "/")
     url <- paste(baseurl,year,"5-Year",pums, sep="/")
     if(!file.exists(fdir)) download.file(url, fdir)
+    if(!file.exists(gsub(".zip","",fdir))) unzip(fdir, exdir = gsub(".zip","",fdir))
   }
+  
+  
+  #finding the files extracted
+  files <- list.files(paste(filedest, gsub(".zip","", zips), sep = "/"))
+  
+  #Reading PUMS data into R
+  pums <- lapply(paste(filedest, gsub(".zip","", zips), files[grepl(".csv",files)], sep = "/"), fread)
+  
+  return(pums)
 }
 
 
 
 #Downloads the latest or specified PUMS data
-dl.tables <- function(state=NULL, year=NULL, filedest=NULL) {
+dl.tables <- function(state=NULL,
+                      year=NULL,
+                      tables.id = c("B01001","B08201","B09019","B19001","B25124","C24050"),
+                      filedest="./data/raw") {
   
   baseurl <- "https://www2.census.gov/programs-surveys/acs/summary_file"
   
@@ -98,14 +111,11 @@ dl.tables <- function(state=NULL, year=NULL, filedest=NULL) {
   #Ensure lower case
   state <- tolower(state)
   names(statebrevs) <- tolower(names(statebrevs))
-  
+  statebrevs <- c(statebrevs, "dc"="district of columbia")
   
   #Basic checks
   if(is.null(state)) stop("Invalid state specified")
-  if(is.null(filedest)) {
-    filedest <- "./data/raw"
-    print(paste("No file destination specified, using default:", filedest))
-  }
+  if(is.null(filedest)) print(paste("No file destination specified, using default:", filedest))
   if(is.null(year)) {
     html <- paste(readLines(baseurl), collapse="\n")
     matched <- unlist(str_match_all(html, "<a href=\"(.*?)\""))
@@ -130,10 +140,9 @@ dl.tables <- function(state=NULL, year=NULL, filedest=NULL) {
   lookup <- fread(fdir)
   
   #determine which files
-  tableid <- c("B01001","B08201","B09019","B19001","B25124","C24050")
-  tableseq <- unique(lookup[`Table ID` %in% tableid, `Sequence Number`])
-  seqfiles <- paste0("e",year,"5",state,sprintf("%04d",tableseq),"000.txt")
-  headfiles <- paste0("xls_temp/seq",tableseq,".xlsx")
+  tables.seq <- unique(lookup[`Table ID` %in% tables.id, `Sequence Number`])
+  tables.seqfiles <- paste0("e",year,"5",state,sprintf("%04d",tables.seq),"000.txt")
+  tables.headfiles <- paste0("xls_temp/seq",tables.seq,".xlsx")
   
   
   ## download header file
@@ -143,9 +152,13 @@ dl.tables <- function(state=NULL, year=NULL, filedest=NULL) {
   if(!file.exists(fdir)) download.file(url, fdir)
   
   #unzip and load header files
-  unzip(fdir, files = c(headfiles,paste0("xls_temp/",year,"_SFGeoFileTemplate.xls")), exdir = sub(".zip","",fdir))
-  headerdat <- lapply(paste(gsub(".zip","",fdir), headfiles, sep = "/"), function(x) read.xlsx(x, 1))
-  names(headerdat) <- tableseq
+  unzip(fdir, files = c(tables.headfiles,paste0("xls_temp/",year,"_SFGeoFileTemplate.xls")), exdir = sub(".zip","",fdir))
+  tables.headers <- lapply(paste(gsub(".zip","",fdir), tables.headfiles, sep = "/"), function(x) as.character(as.matrix(read.xlsx(x, 1))[1,]))
+  names(tables.headers) <- tables.seq
+  
+  #read geocode header file
+  geocode.header <- read.xlsx(paste(gsub(".zip","",fdir), paste0("xls_temp/",year,"_SFGeoFileTemplate.xls"), sep = "/"),1)
+  geocode.header <- structure(.Data = as.matrix(geocode.header)[1,], .Names = colnames(geocode.header))
   
   
   ## download the summary files
@@ -155,19 +168,51 @@ dl.tables <- function(state=NULL, year=NULL, filedest=NULL) {
   if(!file.exists(fdir)) download.file(url, fdir)
   
   #unzip and load summary files
-  unzip(fdir, files = c(seqfiles,paste0("g",year,"5",state,".csv")), exdir = gsub(".zip","",fdir))
-  censusdat <- lapply(paste(gsub(".zip","",fdir), seqfiles, sep = "/"), fread)
-  names(censusdat) <- tableseq
+  unzip(fdir, files = c(tables.seqfiles,paste0("g",year,"5",state,".csv")), exdir = gsub(".zip","",fdir))
+  tables.data <- lapply(paste(gsub(".zip","",fdir), tables.seqfiles, sep = "/"), fread)
+  names(tables.data) <- tables.id
   
+  #Read the geocode locations data
+  geocode.data <- fread(paste(gsub(".zip","",fdir), paste0("g",year,"5",state,".csv"), sep="/"))
+  colnames(geocode.data) <- names(geocode.header)
+  
+  #Naming the census table data columns and adding GEOID
+  for(x in as.character(tables.seq)) {
+    colnames(tables.data[[x]]) <- tables.headers[[x]]
+    tables.data[[x]] <- merge(geocode.data[ , .(LOGRECNO,GEOID,NAME,STATE,COUNTY,TRACT)], tables.data[[x]], by = "LOGRECNO")
+  }
+  
+  
+  return(tables.data)
+}
+
+#Download the latest shapefiles
+
+dl.geodata <- function(state=NULL, year=NULL, filedest="./data/raw") {
+  
+  baseurl <- "https://www2.census.gov/geo/tiger/PREVGENZ/cd/"
+  
+  
+  #state code number
+  statecode <- fread("./data/fips.txt")
+  statecode[ , STATE := tolower(statecode[,STATE])]
+  
+  #Abbreviations
+  statebrevs <- structure(.Data = state.name, .Names = state.abb)
+  
+  #Ensure lower case
+  state <- tolower(state)
+  names(statebrevs) <- tolower(names(statebrevs))
+  statebrevs <- tolower(statebrevs)
+  statebrevs <- c(statebrevs, "dc"="district of columbia")
+
+  
+  statecode
   
   #
-  for(x in as.character(tableseq)) colnames(censusdat[[x]]) <- as.matrix(headerdat[[x]])[1,]
   
   
 }
-
-
-
 
 
 
