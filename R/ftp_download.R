@@ -6,7 +6,7 @@ library(xlsx)
 
 #### Setup the state name and codes
 #state code number
-statecode <- fread("./data/fips.txt")
+statecode <- fread("./data/raw/fips.txt")
 statecode[ , STATE := tolower(statecode[,STATE])]
 
 #Abbreviations
@@ -20,6 +20,7 @@ statebrevs <- rbind(statebrevs, data.table(STATE = "district of columbia", ABBRE
 #merge state abbreviation to state code
 statecode <- merge(statebrevs, statecode, by = "STATE")
 rm(statebrevs)
+
 
 #### FTP Download functions ####
 #Downloads the latest or specified LODES data for home-work, home-industry, and work-industry
@@ -72,7 +73,8 @@ dl.lodes <- function(state=NULL, year=NULL, filedest="./data/raw") {
   lodes <- lapply(paste(filedest,files,sep = "/"), fread)
   names(lodes) <- c("od","rac","wac")
   
-  return(lodes)
+  #Return but do not print
+  invisible(lodes)
 }
 
 #Downloads the latest or specified PUMS data
@@ -136,7 +138,8 @@ dl.pums <- function(state=NULL, year=NULL, filedest= "./data/raw") {
   #Cleaning up the extracted zips
   for(pums in zips) unlink(paste(filedest, gsub(".zip","",pums), sep = "/"), recursive = T)
   
-  return(pums.data)
+  #Return but do not print
+  invisible(lodes)
 }
 
 #Downloads the latest or specified PUMS data
@@ -236,8 +239,8 @@ dl.tables <- function(state=NULL,
     tables.data[[x]] <- merge(geocode.data[ , .(LOGRECNO,GEOID,NAME,STATE,COUNTY,TRACT)], tables.data[[x]], by = "LOGRECNO")
   }
   
-
-  return(tables.data)
+  #Return but do not print
+  invisible(lodes)
 }
 
 #Download the latest shapefiles
@@ -246,7 +249,7 @@ dl.geodata <- function(state=NULL, year=NULL, filedest="./data/raw") {
   baseurl <- "https://www2.census.gov/geo/tiger"
  
   #Basic checks
-  if(is.null(state) | !(state %in% statebrevs$ABBREV)) 
+  if(is.null(state) | !(state %in% statecode$ABBREV)) 
     stop("Invalid state specified")
   if(!file.exists(filedest)) {
     filedest="./data/raw"
